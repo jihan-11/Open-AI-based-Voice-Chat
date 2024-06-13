@@ -1,12 +1,12 @@
 import speech_recognition as sr # type: ignore
 import pyttsx3 # type: ignore
-import openai # type: ignore
+import openAIBOT # type: ignore
 
 # Initialize pyttsx3
 engine = pyttsx3.init()
 
 # Set your OpenAI API key and customize the chatgpt role
-openai.api_key = "xyz"
+openAIBOT.api_key = "xyz"
 messages = [{"role": "system", "content": "Your name is Jarvis and give answers in 2 lines"}]
 
 # Customizing the output voice
@@ -16,7 +16,7 @@ volume = engine.getProperty('volume')
 
 def get_response(user_input):
     messages.append({"role": "user", "content": user_input})
-    response = openai.ChatCompletion.create(
+    response = openAIBOT.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=messages
     )
