@@ -8,7 +8,7 @@ pip install speechrecognition
 pip install pyttsx3
 pip install openai
 sudo apt-get install espeak
-sudo apt-get install Flac
+sudo apt-get install flac
 
 To Run:
 python openAIBot.py
