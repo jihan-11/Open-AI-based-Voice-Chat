@@ -6,7 +6,7 @@ import openai # type: ignore
 engine = pyttsx3.init()
 
 # Set your OpenAI API key and customize the chatgpt role
-openai.api_key = "xyz"
+openai.api_key = "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"
 messages = [{"role": "system", "content": "Your name is Jarvis and give answers in 2 lines"}]
 
 # Customizing the output voice
@@ -56,7 +56,7 @@ def main():
             response_from_openai = get_response(speech_text)
             engine.setProperty('rate', 120)
             engine.setProperty('volume', volume)
-            engine.setProperty('voice', voices[0].id)  # Adjust as needed for specific voice
+            engine.setProperty('voice', greek[0].id)  # Adjust as needed for specific voice
             engine.say(response_from_openai)
             engine.runAndWait()
         else:
