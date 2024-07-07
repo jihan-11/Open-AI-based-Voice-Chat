@@ -6,7 +6,7 @@ import openai
 load_dotenv()
 
 # Set your OpenAI API key from environment variable
-openai.api_key = os.getenv('')
+openai.api_key = os.getenv('OPENAI_API_KEY')
 
 # Function to fetch response from OpenAI
 def get_response(user_input):
