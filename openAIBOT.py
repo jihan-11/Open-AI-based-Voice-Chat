@@ -2,11 +2,10 @@ import os
 from pocketsphinx import LiveSpeech
 from gtts import gTTS
 import subprocess
-import openai  # Import the openai module
+import requests  # Requests library for HTTP requests
 
-# Set your OpenAI API key and customize the chatgpt role
-openai.api_key = "xyz"
-messages = [{"role": "system", "content": "Your name is Jarvis and give answers in 2 lines"}]
+# Set your OpenAI API key
+OPENAI_API_KEY = "YOUR_OPENAI_API_KEY_HERE"
 
 # Define the path to the PocketSphinx acoustic model and language model
 MODELDIR = "/usr/share/pocketsphinx/model"
@@ -25,12 +24,20 @@ speech = LiveSpeech(
 )
 
 def get_response(user_input):
-    global messages
-    messages.append({"role": "user", "content": user_input})
-    # Replace with your logic for OpenAI responses
-    ChatGPT_reply = "Placeholder response from OpenAI"
-    messages.append({"role": "assistant", "content": ChatGPT_reply})
-    return ChatGPT_reply
+    # Example function to interact with OpenAI API (text generation)
+    prompt = user_input  # Replace with your prompt logic
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {OPENAI_API_KEY}"
+    }
+    data = {
+        "model": "text-davinci-002",
+        "prompt": prompt,
+        "max_tokens": 50
+    }
+    response = requests.post("https://api.openai.com/v1/engines/text-davinci-002/completions", headers=headers, json=data)
+    response_json = response.json()
+    return response_json["choices"][0]["text"].strip()
 
 def recognize_speech_from_mic():
     global speech
