@@ -1,24 +1,16 @@
 from pocketsphinx import LiveSpeech, get_model_path
 from gtts import gTTS
 import subprocess
-import openai
+import gpt_2_simple as gpt2
 
-# Set your OpenAI API key and customize the chatgpt role
-openai.api_key = "xyz"
-messages = [{"role": "system", "content": "Your name is Jarvis and give answers in 2 lines"}]
+# Download the GPT-2 model (if not already downloaded)
+gpt2.download_gpt2(model_name="124M")
 
 # Customizing the output voice (not applicable for gTTS)
 
 def get_response(user_input):
-    global messages
-    messages.append({"role": "user", "content": user_input})
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=messages
-    )
-    ChatGPT_reply = response["choices"][0]["message"]["content"]
-    messages.append({"role": "assistant", "content": ChatGPT_reply})
-    return ChatGPT_reply
+    response = gpt2.generate(sess, prefix=user_input, return_as_list=True)[0]
+    return response
 
 # Initialize PocketSphinx recognizer
 MODELDIR = get_model_path()
@@ -33,6 +25,10 @@ speech = LiveSpeech(
     dic=os.path.join(MODELDIR, 'cmudict-en-us.dict')
 )
 
+# Start a TensorFlow session for GPT-2
+sess = gpt2.start_tf_sess()
+gpt2.load_gpt2(sess, model_name="124M")
+
 while True:
     try:
         print("Listening...")
@@ -41,8 +37,8 @@ while True:
             print(f"Recognized: {response}")
 
             if "jarvis" in response.lower():
-                response_from_openai = get_response(response)
-                tts = gTTS(text=response_from_openai, lang='en')
+                response_from_gpt = get_response(response)
+                tts = gTTS(text=response_from_gpt, lang='en')
                 tts.save("/tmp/output.mp3")  # Save to a temporary file
                 subprocess.run(["mpg321", "/tmp/output.mp3"])
                 break
