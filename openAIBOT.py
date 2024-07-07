@@ -1,19 +1,11 @@
 import os
 from pocketsphinx import LiveSpeech
-import pyttsx3
-import openai
-
-# Initialize pyttsx3
-engine = pyttsx3.init()
+from gtts import gTTS
+import subprocess
 
 # Set your OpenAI API key and customize the chatgpt role
 openai.api_key = "xyz"
 messages = [{"role": "system", "content": "Your name is Jarvis and give answers in 2 lines"}]
-
-# Customizing the output voice
-voices = engine.getProperty('voices')
-rate = engine.getProperty('rate')
-volume = engine.getProperty('volume')
 
 # Define the path to the PocketSphinx acoustic model and language model
 MODELDIR = "/usr/share/pocketsphinx/model"
@@ -48,9 +40,14 @@ def recognize_speech_from_mic():
         print(f"Recognized: {recognized_text}")
         return recognized_text
 
-def main():
-    global engine, voices, rate, volume
+def text_to_speech(text):
+    tts = gTTS(text=text, lang='en')
+    tts.save("/tmp/output.mp3")  # Save to a temporary file
 
+    # Use mpg321 to play the audio
+    subprocess.run(["mpg321", "/tmp/output.mp3"])
+
+def main():
     while True:
         try:
             speech_text = recognize_speech_from_mic()
@@ -64,14 +61,9 @@ def main():
         
         if "jarvis" in speech_text.lower():
             response_from_openai = get_response(speech_text)
-            engine.setProperty('rate', 120)
-            engine.setProperty('volume', volume)
-            engine.setProperty('voice', voices[0].id)  # Adjust as needed for specific voice
-            engine.say(response_from_openai)
-            engine.runAndWait()
+            text_to_speech(response_from_openai)
         else:
             print("Didn't recognize 'jarvis'.")
 
 if __name__ == "__main__":
     main()
-
