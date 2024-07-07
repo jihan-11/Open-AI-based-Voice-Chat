@@ -12,4 +12,4 @@ sudo apt-get install espeak
 sudo apt-get install flac
 
 To Run:
-python openAIBot.py
+python openAIBOT.py
