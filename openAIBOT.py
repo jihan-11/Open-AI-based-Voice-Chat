@@ -16,7 +16,7 @@ speech = LiveSpeech(
     pocketsphinx_args={
         'hmm': os.path.join(MODELDIR, 'en-us'),
         'lm': os.path.join(MODELDIR, 'en-us.lm.bin'),
-        'dic': os.path.join(MODELDIR, 'cmudict-en-us.dict')
+        'dict': os.path.join(MODELDIR, 'cmudict-en-us.dict')
     }
 )
 
