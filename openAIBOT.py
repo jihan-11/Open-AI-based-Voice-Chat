@@ -10,15 +10,19 @@ openai.api_key = 'your_openai_api_key'
 # Customizing the output voice (not applicable for gTTS)
 
 def get_response(user_input):
-    response = openai.Completion.create(
-        model="text-davinci-003",
-        prompt=user_input,
-        max_tokens=100,
-        n=1,
-        stop=None,
-        temperature=0.7
-    )
-    return response.choices[0].text.strip()
+    try:
+        response = openai.Completion.create(
+            model="text-davinci-003",
+            prompt=user_input,
+            max_tokens=100,
+            n=1,
+            stop=None,
+            temperature=0.7
+        )
+        return response.choices[0].text.strip()
+    except Exception as e:
+        print(f"Error fetching response from OpenAI: {e}")
+        return "I'm sorry, there was an error processing your request."
 
 # Initialize PocketSphinx recognizer with explicit paths
 MODELDIR = '/home/jihan11/Open-AI-based-Voice-Chat-Raspberry-Pi/myenv/lib/python3.11/site-packages/pocketsphinx/model/en-us'
@@ -33,7 +37,9 @@ speech = LiveSpeech(
     dic=os.path.join(MODELDIR, 'cmudict-en-us.dict')
 )
 
-while True:
+listening = True  # Flag to control listening loop
+
+while listening:
     try:
         print("Listening...")
         for phrase in speech:
@@ -47,10 +53,8 @@ while True:
                 tts = gTTS(text=response_from_openai, lang='en')
                 tts.save("/tmp/output.mp3")  # Save to a temporary file
                 subprocess.run(["mpg321", "/tmp/output.mp3"])
+                listening = False  # Exit the while loop after processing one command
                 break  # Exit the for loop after processing one command
 
-            else:
-                print("Didn't recognize 'jarvis'.")
-    
     except Exception as e:
         print(f"Error: {e}")
