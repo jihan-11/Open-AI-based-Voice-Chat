@@ -1,15 +1,25 @@
 from pocketsphinx import LiveSpeech, get_model_path
 from gtts import gTTS
 import subprocess
-import gpt_2_simple as gpt2
+from transformers import GPT2LMHeadModel, GPT2Tokenizer
+import torch
 
-# Download the GPT-2 model (if not already downloaded)
-gpt2.download_gpt2(model_name="124M")
+# Initialize the GPT-2 model and tokenizer
+tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+model = GPT2LMHeadModel.from_pretrained('gpt2')
+model.eval()
+
+# Set device to GPU if available
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model.to(device)
 
 # Customizing the output voice (not applicable for gTTS)
 
 def get_response(user_input):
-    response = gpt2.generate(sess, prefix=user_input, return_as_list=True)[0]
+    input_ids = tokenizer.encode(user_input, return_tensors='pt').to(device)
+    with torch.no_grad():
+        output = model.generate(input_ids, max_length=100, num_return_sequences=1)
+        response = tokenizer.decode(output[0], skip_special_tokens=True)
     return response
 
 # Initialize PocketSphinx recognizer
@@ -24,10 +34,6 @@ speech = LiveSpeech(
     lm=os.path.join(MODELDIR, 'en-us.lm.bin'),
     dic=os.path.join(MODELDIR, 'cmudict-en-us.dict')
 )
-
-# Start a TensorFlow session for GPT-2
-sess = gpt2.start_tf_sess()
-gpt2.load_gpt2(sess, model_name="124M")
 
 while True:
     try:
