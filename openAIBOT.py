@@ -41,27 +41,9 @@ while True:
             print(f"Recognized: {response}")
 
             if "jarvis" in response.lower():
-                response_from_openai = get_response(response)
-                tts = gTTS(text=response_from_openai, lang='en')
-                tts.save("/tmp/output.mp3")  # Save to a temporary file
-                subprocess.run(["mpg321", "/tmp/output.mp3"])
-                break
-            else:
-                print("Didn't recognize 'jarvis'.")
-
-    except Exception as e:
-        print(f"Error: {e}")
-
-while True:
-    try:
-        print("Listening...")
-        for phrase in speech:
-            response = str(phrase)
-            print(f"Recognized: {response}")
-
-            if "jarvis" in response.lower():
                 print("Trigger word 'jarvis' recognized.")
                 response_from_openai = get_response(response)
+                print(f"Response from OpenAI: {response_from_openai}")
                 tts = gTTS(text=response_from_openai, lang='en')
                 tts.save("/tmp/output.mp3")  # Save to a temporary file
                 subprocess.run(["mpg321", "/tmp/output.mp3"])
@@ -72,4 +54,3 @@ while True:
     
     except Exception as e:
         print(f"Error: {e}")
-
