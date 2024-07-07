@@ -2,6 +2,7 @@ import os
 from pocketsphinx import LiveSpeech
 from gtts import gTTS
 import subprocess
+import openai  # Import the openai module
 
 # Set your OpenAI API key and customize the chatgpt role
 openai.api_key = "xyz"
