@@ -1,74 +1,57 @@
-import os
-from pocketsphinx import LiveSpeech, get_model_path
-from gtts import gTTS
-import subprocess
-import requests  # Requests library for HTTP requests
+import speech_recognition as sr
+import pyttsx3
+import openai
 
-# Set your OpenAI API key
-OPENAI_API_KEY = "YOUR_OPENAI_API_KEY_HERE"
+#Initializing pyttsx3
+listening = True
+engine = pyttsx3.init()
 
-# Initialize the PocketSphinx recognizer
-MODELDIR = get_model_path()
-speech = LiveSpeech(
-    verbose=False,
-    sampling_rate=16000,
-    buffer_size=2048,
-    pocketsphinx_args={
-        'hmm': os.path.join(MODELDIR, 'en-us'),
-        'lm': os.path.join(MODELDIR, 'en-us.lm.bin'),
-        'dict': os.path.join(MODELDIR, 'cmudict-en-us.dict')
-    }
-)
+#Set your openai api key and customizing the chatgpt role
+openai.api_key = "xyz"
+messages = [{"role": "system", "content": "Your name is Jarvis and give answers in 2 lines"}]
+
+#Customizing The output voice
+voices = engine.getProperty('voices')
+rate = engine.getProperty('rate')
+volume = engine.getProperty('volume')
+
 
 def get_response(user_input):
-    # Example function to interact with OpenAI API (text generation)
-    prompt = user_input  # Replace with your prompt logic
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {OPENAI_API_KEY}"
-    }
-    data = {
-        "model": "text-davinci-002",
-        "prompt": prompt,
-        "max_tokens": 50
-    }
-    response = requests.post("https://api.openai.com/v1/engines/text-davinci-002/completions", headers=headers, json=data)
-    response_json = response.json()
-    return response_json["choices"][0]["text"].strip()
+    messages.append({"role": "user", "content": user_input})
+    response = openai.ChatCompletion.create(
+        model = "gpt-3.5-turbo",
+        messages = messages
+    )
+    ChatGPT_reply = response["choices"][0]["message"]["content"]
+    messages.append({"role": "assistant", "content": ChatGPT_reply})
+    return ChatGPT_reply
 
-def recognize_speech_from_mic():
-    global speech
-    print("Listening...")
 
-    for phrase in speech:
-        recognized_text = str(phrase)
-        print(f"Recognized: {recognized_text}")
-        return recognized_text
+while listening:
+    with sr.Microphone() as source:
+        recognizer = sr.Recognizer()
+        recognizer.adjust_for_ambient_noise(source)
+        recognizer.dynamic_energy_threshold = 3000
 
-def text_to_speech(text):
-    tts = gTTS(text=text, lang='en')
-    tts.save("/tmp/output.mp3")  # Save to a temporary file
-
-    # Use mpg321 to play the audio
-    subprocess.run(["mpg321", "/tmp/output.mp3"])
-
-def main():
-    while True:
         try:
-            speech_text = recognize_speech_from_mic()
-        except Exception as e:
-            print(f"Error recognizing speech: {e}")
-            continue
-        
-        if not speech_text:
+            print("Listening...")
+            audio = recognizer.listen(source, timeout=5.0)
+            response = recognizer.recognize_google(audio)
+            print(response)
+           
+            if "jarvis" in response.lower():
+           
+                response_from_openai = get_response(response)
+                engine.setProperty('rate', 120)
+                engine.setProperty('volume', volume)
+                engine.setProperty('voice', 'greek')
+                engine.say(response_from_openai)
+                engine.runAndWait()
+               
+           
+               
+            else:
+                print("Didn't recognize 'jarvis'.")
+           
+        except sr.UnknownValueError:
             print("Didn't recognize anything.")
-            continue
-        
-        if "jarvis" in speech_text.lower():
-            response_from_openai = get_response(speech_text)
-            text_to_speech(response_from_openai)
-        else:
-            print("Didn't recognize 'jarvis'.")
-
-if __name__ == "__main__":
-    main()
