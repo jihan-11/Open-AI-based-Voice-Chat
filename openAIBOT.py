@@ -13,11 +13,11 @@ speech = LiveSpeech(
     verbose=False,
     sampling_rate=16000,
     buffer_size=2048,
-    no_search=False,
-    full_utt=False,
-    hmm=os.path.join(MODELDIR, 'en-us'),
-    lm=os.path.join(MODELDIR, 'en-us.lm.bin'),
-    dic=os.path.join(MODELDIR, 'cmudict-en-us.dict')
+    pocketsphinx_args={
+        'hmm': os.path.join(MODELDIR, 'en-us'),
+        'lm': os.path.join(MODELDIR, 'en-us.lm.bin'),
+        'dic': os.path.join(MODELDIR, 'cmudict-en-us.dict')
+    }
 )
 
 def get_response(user_input):
