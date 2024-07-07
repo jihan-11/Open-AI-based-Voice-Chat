@@ -1,4 +1,4 @@
-from pocketsphinx import LiveSpeech, get_model_path
+from pocketsphinx import LiveSpeech
 from gtts import gTTS
 import subprocess
 import os
@@ -20,8 +20,8 @@ def get_response(user_input):
     )
     return response.choices[0].text.strip()
 
-# Initialize PocketSphinx recognizer
-MODELDIR = get_model_path()
+# Initialize PocketSphinx recognizer with explicit paths
+MODELDIR = '/home/jihan11/Open-AI-based-Voice-Chat-Raspberry-Pi/myenv/lib/python3.11/site-packages/pocketsphinx/model/en-us'
 speech = LiveSpeech(
     verbose=False,
     sampling_rate=16000,
