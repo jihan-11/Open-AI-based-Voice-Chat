@@ -7,8 +7,7 @@ import openai
 # Set your OpenAI API key
 openai.api_key = 'your_openai_api_key'
 
-# Customizing the output voice (not applicable for gTTS)
-
+# Function to fetch response from OpenAI
 def get_response(user_input):
     try:
         response = openai.Completion.create(
@@ -37,24 +36,23 @@ speech = LiveSpeech(
     dic=os.path.join(MODELDIR, 'cmudict-en-us.dict')
 )
 
-listening = True  # Flag to control listening loop
-
-while listening:
+while True:
     try:
         print("Listening...")
         for phrase in speech:
-            response = str(phrase)
-            print(f"Recognized: {response}")
-
-            if "jarvis" in response.lower():
-                print("Trigger word 'jarvis' recognized.")
-                response_from_openai = get_response(response)
-                print(f"Response from OpenAI: {response_from_openai}")
-                tts = gTTS(text=response_from_openai, lang='en')
-                tts.save("/tmp/output.mp3")  # Save to a temporary file
-                subprocess.run(["mpg321", "/tmp/output.mp3"])
-                listening = False  # Exit the while loop after processing one command
-                break  # Exit the for loop after processing one command
+            user_input = str(phrase)
+            print(f"Recognized: {user_input}")
+            
+            # Fetch response from OpenAI
+            response_from_openai = get_response(user_input)
+            print(f"Response from OpenAI: {response_from_openai}")
+            
+            # Convert response to speech and play it
+            tts = gTTS(text=response_from_openai, lang='en')
+            tts.save("/tmp/output.mp3")  # Save to a temporary file
+            subprocess.run(["mpg321", "/tmp/output.mp3"])
+            
+            break  # Exit the for loop after processing one command
 
     except Exception as e:
         print(f"Error: {e}")
