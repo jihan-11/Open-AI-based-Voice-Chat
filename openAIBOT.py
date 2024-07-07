@@ -1,10 +1,7 @@
-import speech_recognition as sr
+from pocketsphinx import LiveSpeech, get_model_path
 from gtts import gTTS
 import subprocess
 import openai
-
-# Initializing gTTS
-engine = None  # Placeholder for gTTS, not needed for gTTS
 
 # Set your OpenAI API key and customize the chatgpt role
 openai.api_key = "xyz"
@@ -23,36 +20,34 @@ def get_response(user_input):
     messages.append({"role": "assistant", "content": ChatGPT_reply})
     return ChatGPT_reply
 
+# Initialize PocketSphinx recognizer
+MODELDIR = get_model_path()
+speech = LiveSpeech(
+    verbose=False,
+    sampling_rate=16000,
+    buffer_size=2048,
+    no_search=False,
+    full_utt=False,
+    hmm=os.path.join(MODELDIR, 'en-us'),
+    lm=os.path.join(MODELDIR, 'en-us.lm.bin'),
+    dic=os.path.join(MODELDIR, 'cmudict-en-us.dict')
+)
+
 while True:
     try:
-        recognizer = sr.Recognizer()
-        
-        with sr.Microphone() as source:
-            recognizer.adjust_for_ambient_noise(source)
-            print("Listening...")
-            audio = recognizer.listen(source, timeout=5.0)
+        print("Listening...")
+        for phrase in speech:
+            response = str(phrase)
+            print(f"Recognized: {response}")
 
-        response = recognizer.recognize_google(audio)
-        print(f"Recognized: {response}")
+            if "jarvis" in response.lower():
+                response_from_openai = get_response(response)
+                tts = gTTS(text=response_from_openai, lang='en')
+                tts.save("/tmp/output.mp3")  # Save to a temporary file
+                subprocess.run(["mpg321", "/tmp/output.mp3"])
+                break
+            else:
+                print("Didn't recognize 'jarvis'.")
 
-        if "jarvis" in response.lower():
-            response_from_openai = get_response(response)
-            
-            # Using gTTS for text-to-speech
-            tts = gTTS(text=response_from_openai, lang='en')
-            tts.save("/tmp/output.mp3")  # Save to a temporary file
-
-            # Use mpg321 to play the audio
-            subprocess.run(["mpg321", "/tmp/output.mp3"])
-           
-        else:
-            print("Didn't recognize 'jarvis'.")
-
-    except sr.UnknownValueError:
-        print("Didn't recognize anything.")
-    
-    except sr.RequestError as e:
-        print(f"Error fetching results; {e}")
-    
     except Exception as e:
         print(f"Error: {e}")
