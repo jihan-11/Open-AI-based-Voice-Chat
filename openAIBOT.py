@@ -1,5 +1,5 @@
 import os
-from pocketsphinx import LiveSpeech
+from pocketsphinx import LiveSpeech, get_model_path
 from gtts import gTTS
 import subprocess
 import requests  # Requests library for HTTP requests
@@ -7,20 +7,17 @@ import requests  # Requests library for HTTP requests
 # Set your OpenAI API key
 OPENAI_API_KEY = "YOUR_OPENAI_API_KEY_HERE"
 
-# Define the path to the PocketSphinx acoustic model and language model
-MODELDIR = "/usr/share/pocketsphinx/model"
-# You might need to adjust MODELDIR based on your system configuration
-
 # Initialize the PocketSphinx recognizer
+MODELDIR = get_model_path()
 speech = LiveSpeech(
     verbose=False,
     sampling_rate=16000,
     buffer_size=2048,
     no_search=False,
     full_utt=False,
-    hmm=os.path.join(MODELDIR, "en-us"),
-    lm=os.path.join(MODELDIR, "en-us.lm.bin"),
-    dic=os.path.join(MODELDIR, "cmudict-en-us.dict")
+    hmm=os.path.join(MODELDIR, 'en-us'),
+    lm=os.path.join(MODELDIR, 'en-us.lm.bin'),
+    dic=os.path.join(MODELDIR, 'cmudict-en-us.dict')
 )
 
 def get_response(user_input):
